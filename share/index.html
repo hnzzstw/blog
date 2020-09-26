@@ -1,0 +1,170 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=2"><meta name="theme-color" content="#6c599f"><meta name="generator" content="Hexo 4.2.1"><link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png"><link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#6c599f"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="stylesheet" href="/css/main.css"><link rel="stylesheet" href="//fonts.googleapis.com/css?family=EB Garamond:300,300italic,400,400italic,700,700italic|Long Cang:300,300italic,400,400italic,700,700italic|Noto Serif SC:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext"><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css"><script id="hexo-configurations">var NexT=window.NexT||{},CONFIG={hostname:"mirror.zdl.one",root:"/",scheme:"Gemini",version:"7.8.0",exturl:!1,sidebar:{position:"left",display:"post",padding:18,offset:12,onmobile:!1},copycode:{enable:!0,show_result:!0,style:"mac"},back2top:{enable:!1,sidebar:!1,scrollpercent:!0},bookmark:{enable:!1,color:"#222",save:"auto"},fancybox:!0,mediumzoom:!1,lazyload:!0,pangu:!0,comments:{style:"tabs",active:null,storage:!0,lazyload:!0,nav:null},algolia:{hits:{per_page:10},labels:{input_placeholder:"Search for Posts",hits_empty:"We didn't find any results for the search: ${query}",hits_stats:"${hits} results found in ${time} ms"}},localsearch:{enable:!0,trigger:"auto",top_n_per_article:1,unescape:!1,preload:!1},motion:{enable:!1,async:!1,transition:{post_block:"fadeIn",post_header:"slideDownIn",post_body:"slideDownIn",coll_header:"slideLeftIn",sidebar:"slideUpIn"}},path:"search.xml"}</script><meta name="description" content="希望我们，都成为拥有好奇心与想象力的人，都是不断发现更大世界的有趣人类。书单纪录片代码实验台湾这些年所知道的祖国. 廖信忠作者的系列作品了，不过说实话没有最初的《我们台湾这些年》好看。我们台湾这些年. 廖信忠一个个小人物的故事构成了台湾社会发展的方方面面，一本书或许不能帮助我们认识了解这个宝岛的过往，但是可以带给一个我们更真切的台湾。目击中国100年. 成勇十分用心编写的一本书，或者更准确说是画册"><meta property="og:type" content="website"><meta property="og:title" content="好物分享"><meta property="og:url" content="https://mirror.zdl.one/share/index.html"><meta property="og:site_name" content="天伟技术博客"><meta property="og:description" content="希望我们，都成为拥有好奇心与想象力的人，都是不断发现更大世界的有趣人类。书单纪录片代码实验台湾这些年所知道的祖国. 廖信忠作者的系列作品了，不过说实话没有最初的《我们台湾这些年》好看。我们台湾这些年. 廖信忠一个个小人物的故事构成了台湾社会发展的方方面面，一本书或许不能帮助我们认识了解这个宝岛的过往，但是可以带给一个我们更真切的台湾。目击中国100年. 成勇十分用心编写的一本书，或者更准确说是画册"><meta property="og:locale" content="zh_CN"><meta property="article:published_time" content="2020-09-26T07:00:55.911Z"><meta property="article:modified_time" content="2020-05-20T08:33:41.000Z"><meta property="article:author" content="天伟"><meta property="article:tag" content="程序员"><meta property="article:tag" content="天伟"><meta property="article:tag" content="博客"><meta property="article:tag" content="blog"><meta name="twitter:card" content="summary"><link rel="canonical" href="https://mirror.zdl.one/share/"><script id="page-configurations">CONFIG.page={sidebar:"",isHome:!1,isPost:!1,lang:"zh-CN"}</script><script type="text/javascript">// Live2d
+// 注意：live2d_path 参数应使用绝对路径
+//const live2d_path = "https://web-1256060851.cos.ap-shanghai.myqcloud.com/assets-hexo/live2d/";
+const live2d_path = "/live2d/";
+
+// 封装异步加载资源的方法
+function loadExternalResource(url, type) {
+	return new Promise((resolve, reject) => {
+		let tag;
+
+		if (type === "css") {
+			tag = document.createElement("link");
+			tag.rel = "stylesheet";
+			tag.href = url;
+		}
+		else if (type === "js") {
+			tag = document.createElement("script");
+			tag.src = url;
+		}
+		if (tag) {
+			tag.onload = () => resolve(url);
+			tag.onerror = () => reject(url);
+			document.head.appendChild(tag);
+		}
+	});
+}
+
+// 加载 waifu.css live2d.min.js waifu-tips.js
+// if (screen.width >= 768) {
+// 	Promise.all([
+// 		loadExternalResource(live2d_path + "waifu.css", "css"),
+// 		loadExternalResource(live2d_path + "live2d.min.js", "js"),
+// 		loadExternalResource(live2d_path + "waifu-tips.js", "js")
+// 	]).then(() => {
+// 		initWidget({
+// 			waifuPath: live2d_path + "waifu-tips.json",
+// 			apiPath: "https://api.zdl.one/live2d/", // https://live2d.fghrsh.net/api/
+// 			//cdnPath: "https://cdn.jsdelivr.net/gh/fghrsh/live2d_api/"
+// 		});
+// 	});
+// }
+// initWidget 第一个参数为 waifu-tips.json 的路径，第二个参数为 API 地址
+// API 后端可自行搭建，参考 https://github.com/fghrsh/live2d_api
+// 初始化看板娘会自动加载指定目录下的 waifu-tips.json
+
+console.log(`
+  く__,.ヘヽ.        /  ,ー､ 〉
+           ＼ ', !-─‐-i  /  /´
+           ／｀ｰ'       L/／｀ヽ､
+         /   ／,   /|   ,   ,       ',
+       ｲ   / /-‐/  ｉ  L_ ﾊ ヽ!   i
+        ﾚ ﾍ 7ｲ｀ﾄ   ﾚ'ｧ-ﾄ､!ハ|   |
+          !,/7 '0'     ´0iソ|    |
+          |.从"    _     ,,,, / |./    |
+          ﾚ'| i＞.､,,__  _,.イ /   .i   |
+            ﾚ'| | / k_７_/ﾚ'ヽ,  ﾊ.  |
+              | |/i 〈|/   i  ,.ﾍ |  i  |
+             .|/ /  ｉ：    ﾍ!    ＼  |
+              kヽ>､ﾊ    _,.ﾍ､    /､!
+              !'〈//｀Ｔ´', ＼ ｀'7'ｰr'
+              ﾚ'ヽL__|___i,___,ンﾚ|ノ
+                  ﾄ-,/  |___./
+                  'ｰ'    !_,.:
+`);
+// End Live2d Code
+
+window.addEventListener('load', () => {
+	console.log('\n%c天伟博客', 'text-shadow: 0 1px 0 #ccc, 0 2px 0 #c9c9c9, 0 3px 0 #bbb, 0 4px 0 #b9b9b9, 0 5px 0 #aaa, 0 6px 1px rgba(0, 0, 0, .1), 0 0 5px rgba(0, 0, 0, .1), 0 1px 3px rgba(0, 0, 0, .3), 0 3px 5px rgba(0, 0, 0, .2), 0 5px 10px rgba(0, 0, 0, .25), 0 10px 10px rgba(0, 0, 0, .2), 0 20px 20px rgba(0, 0, 0, .15);\
+font-size: 4em;');
+	console.log('\n%cBanban Ramble%cv3.0.0%c\n', 'padding: 8px; background: #3f5973; font-weight: bold; font-size: large; color: white;', 'padding: 8px; background: #649ab6; font-size: large; color: #eee;','');
+	console.log(`页面加载完毕消耗了${Math.round(performance.now() * 100) / 100}ms`);
+});</script><link rel="stylesheet" type="text/css" href="/css/injector.css"><title>好物分享 | 天伟技术博客</title><noscript><style>.sidebar-inner,.use-motion .brand,.use-motion .collection-header,.use-motion .comments,.use-motion .menu-item,.use-motion .pagination,.use-motion .post-block,.use-motion .post-body,.use-motion .post-header{opacity:initial}.use-motion .site-subtitle,.use-motion .site-title{opacity:initial;top:initial}.use-motion .logo-line-before i{left:initial}.use-motion .logo-line-after i{right:initial}</style></noscript><link rel="alternate" href="/atom.xml" title="天伟技术博客" type="application/atom+xml">
+</head><body itemscope itemtype="http://schema.org/WebPage"><div class="container"><div class="headband"></div><header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="header-inner"><div class="site-brand-container"><div class="site-nav-toggle"><div class="toggle" aria-label="切换导航栏"><span class="toggle-line toggle-line-first"></span> <span class="toggle-line toggle-line-middle"></span> <span class="toggle-line toggle-line-last"></span></div></div><div class="site-meta"><a href="/" class="brand" rel="start"><span class="logo-line-before"><i></i></span><h1 class="site-title">天伟技术博客</h1><span class="logo-line-after"><i></i></span></a><p class="site-subtitle" itemprop="description">埋头拼命的同时 别忘了抬头看路</p></div><div class="site-nav-right"><div class="toggle popup-trigger"><i class="fa fa-search fa-fw fa-lg"></i></div></div></div><nav class="site-nav"><ul id="menu" class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fas fa-home fa-fw"></i>本站首页</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-overview"><a href="/overview/" rel="section"><i class="fas fa-th fa-fw"></i>文章总览</a></li><li class="menu-item menu-item-search"><a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索</a></li></ul></nav><div class="search-pop-overlay"><div class="popup search-popup"><div class="search-header"><span class="search-icon"><i class="fa fa-search"></i></span><div class="search-input-container"><input autocomplete="off" autocapitalize="off" placeholder="请输入搜索内容" spellcheck="false" type="search" class="search-input"></div><span class="popup-btn-close"><i class="fa fa-times-circle"></i></span></div><div id="search-result"><div id="no-result"><i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i></div></div></div></div></div></header><main class="main"><div class="main-inner"><div class="content-wrap"><div class="content page posts-expand"><div class="post-block" lang="zh-CN"><header class="post-header"><h1 class="post-title" itemprop="name headline">好物分享</h1><div class="post-meta"></div></header><div class="post-body"><blockquote><p>希望我们，都成为拥有好奇心与想象力的人，都是不断发现更大世界的有趣人类。</p></blockquote><div class="tabs" id="share"><ul class="nav-tabs"><li class="tab active"><a href="#share-1"><i class="fas fa-book"></i>书单</a></li><li class="tab"><a href="#share-2"><i class="fas fa-video"></i>纪录片</a></li><li class="tab"><a href="#share-3"><i class="fas fa-flask"></i>代码实验</a></li></ul><div class="tab-content"><div class="tab-pane active" id="share-1"><ul><li><p><a href="https://book.douban.com/subject/25864000/" target="_blank" rel="noopener"><strong>台湾这些年所知道的祖国</strong></a>. 廖信忠<br>作者的系列作品了，不过说实话没有最初的《我们台湾这些年》好看。</p></li><li><p><a href="https://book.douban.com/subject/4113090/" target="_blank" rel="noopener"><strong>我们台湾这些年</strong></a>. 廖信忠<br>一个个小人物的故事构成了台湾社会发展的方方面面，一本书或许不能帮助我们认识了解这个宝岛的过往，但是可以带给一个我们更真切的台湾。</p></li><li><p><a href="https://book.douban.com/subject/2004652/" target="_blank" rel="noopener"><strong>目击中国100年</strong></a>. 成勇<br>十分用心编写的一本书，或者更准确说是画册。用照片的方式展现有照片记录以来中国20世纪的诸多历史瞬间，让我们得以了解更生动立体的近现代中国。</p></li><li><p><a href="https://book.douban.com/subject/20424526/" target="_blank" rel="noopener"><strong>邓小平时代</strong></a>. 傅高义<br>资料翔实，叙述详尽，向我们展现了改革开放前后那个瞬息万变的历史时期。</p></li><li><p><a href="https://book.douban.com/subject/26847432/" target="_blank" rel="noopener"><strong>為了活下去：脫北女孩朴研美</strong></a>. 朴研美<br>台湾旅游时候买回来的书，对于描述作者个人的经历确实比较同情，但是后面对于中国做法的看法以及对于基督教的理解还是不太认同的。特别是韩国传教士的问题，或许对作者这样的人来说是帮助，但是在中国的疯狂传教其实是很大隐患。</p></li><li><p><a href="https://book.douban.com/subject/26899255/" target="_blank" rel="noopener"><strong>进击的局座</strong></a>. 张召忠<br>局座的书，看中名气买的电子书，语言很朴实很真诚，不过不是我喜欢的话题和风格。</p></li><li><p><a href="https://book.douban.com/subject/26285840/" target="_blank" rel="noopener"><strong>漫画世界系列3：漫画德国</strong></a>. 李元馥<br>高中时候班主任推荐的丛书，从漫画的角度了解各国的社会人文历史，也是很有趣味的，还希望能够把这套书都读一遍。</p></li><li><p><a href="https://book.douban.com/subject/1526244/" target="_blank" rel="noopener"><strong>科学探索者 · 天文学</strong></a>. 帕迪利亚<br>小时候的天文学科普启蒙书之一，里面的好多小实验很有趣味，讲解的一些知识点现在都有印象。</p></li><li><p><a href="https://book.douban.com/subject/1137118/" target="_blank" rel="noopener"><strong>放飞神舟</strong></a>. 石磊<br>我对中国载人航天的最初了解就是这本书带给我的，放飞神舟放飞的不只是载人飞船，而是这个民族几千年来的飞天梦想。如今，月球上的玉兔月球车正在延续我们的下一个梦想。</p></li><li><p><a href="https://book.douban.com/subject/4238941/" target="_blank" rel="noopener"><strong>新卖桔者言</strong></a>. 张五常</p></li><li><p><a href="https://book.douban.com/subject/5252677/" target="_blank" rel="noopener"><strong>幸福了吗？</strong></a>. 白岩松</p></li><li><p><a href="https://book.douban.com/subject/1016003/" target="_blank" rel="noopener"><strong>鲁滨逊漂流记</strong></a>. 笛福</p></li><li><p><a href="https://book.douban.com/subject/3815131/" target="_blank" rel="noopener"><strong>一九八四</strong></a>. 乔治 · 奥威尔</p></li><li><p><a href="https://book.douban.com/subject/26371139/" target="_blank" rel="noopener"><strong>动物庄园</strong></a>. 乔治 · 奥威尔</p></li><li><p><a href="https://book.douban.com/subject/1050339/" target="_blank" rel="noopener"><strong>文化苦旅</strong></a>. 余秋雨</p></li><li><p><a href="https://book.douban.com/subject/20427187/" target="_blank" rel="noopener"><strong>看见</strong></a>. 柴静</p></li><li><p><a href="https://book.douban.com/subject/1008145/" target="_blank" rel="noopener"><strong>围城</strong></a>. 钱钟书</p></li><li><p><a href="https://book.douban.com/subject/1258378/" target="_blank" rel="noopener"><strong>他改变了中国</strong></a>. 罗伯特 · 劳伦斯 · 库恩</p></li></ul></div><div class="tab-pane" id="share-2"><p>一些自己看过的优秀纪录片，以 CCTV 与 BBC 拍摄的纪录片为主，大多是人文历史或者社会纪实类型。自然地理方面的纪录片很少，主要是因为个人对这个题材的纪录片不太感兴趣。</p><h3 id="国产纪录片"><a href="#国产纪录片" class="headerlink" title="国产纪录片"></a>国产纪录片</h3><ul><li><p><strong>超级工程</strong> <font color="#bbb">CCTV 科技</font><br>第三季模仿了 PBS 的 America Revealed，之前看时候就在想中国什么时候也这样拍一部就完美了，然后央视就满足了我的愿望；此外饱受争议的纪录片《辉煌中国》与电影《厉害了我的国》很多素材其实来自超级工程相关纪录片，所以剪辑拼凑痕迹明显，制作比较粗糙，看辉煌中国还不如看超级工程。</p></li><li><p><strong>舌尖上的中国</strong> <font color="#bbb">CCTV 社会文化</font><br>陈晓卿的美食纪录片，讲述美食遍布中华大地，不过《舌尖上的中国》只推荐第一、二季，第三季水平下滑严重，不值得推荐。</p></li><li><p><strong>风味人间</strong> <font color="#bbb">腾讯视频 社会文化</font><br>陈晓卿的美食纪录片，不同于之前的美食纪录片，本片不只是局限在中国，一大亮点就是中外对于同一种食材或者不同风格食材处理方式的对比。</p></li><li><p><strong>过台湾</strong> <font color="#bbb">CCTV 历史</font><br>讲述台湾1945年光复之前400年的历史变迁，史料翔实覆盖广泛，配乐也超级有魔性；如果需要了解台湾光复前后的历史还可以看《台湾·1945》。</p></li><li><p><strong>我在故宫修文物</strong> <font color="#bbb">CCTV 文化</font><br>网红纪录片不解释</p></li><li><p><strong>再说长江</strong> <font color="#bbb">CCTV 社会纪实</font><br>长江流域人文风土纪录片，呼应八十年代爆火纪录片《话说长江》。话说长江算是和同年代央视纪录片《河殇》走了不同的路线，该片在讲述人文风土同时也某种程度上提升了当时民众的民族自豪感与自信心</p></li><li><p><strong>大国崛起</strong> <font color="#bbb">CCTV 历史</font><br>讲述西方历史上各强国崛起历史，本质是为了探究中国复兴之路，这个目的从纪录片最后一集就可以看出来了。此外，该纪录片的旁白稿子很棒，单独拿出来都是一份很好的学习材料。</p></li><li><p><strong>东方卫视医警系列</strong> <font color="#bbb">东方卫视 社会纪实</font><br>有《巡逻现场实录》、《急诊室故事》、《生命时速·紧急救护120》等多部，跟踪拍摄上海市的警察巡逻、院前急救、急诊室抢救等故事，既是记录社会生活的点点滴滴，也展现了管理上海市这样一个超大型城市所需要的精细度。</p></li><li><p><strong>我的铁路，我的故事</strong> <font color="#bbb">CCTV 社会纪实</font><br>中国援建蒙巴萨-内罗毕铁路的故事，该片有英文版 My Railway, My Story；该片中有很多有趣的援非工程故事，以小见大讲述了中国援非工程的实施过程。</p></li></ul><h3 id="日本纪录片"><a href="#日本纪录片" class="headerlink" title="日本纪录片"></a>日本纪录片</h3><ul><li><p><strong>纪实72小时 ドキュメント72時間</strong> <font color="#bbb">NHK 社会纪实</font><br>用72小时不间断地拍摄记录日本的寻常生活，有欢笑有悲伤，每集看完总有一种依依不舍之情。目前，东方卫视也引进了版权，拍摄了中国版的《纪实72小时》。</p></li><li><p><strong>可以跟着去你家吗？ 家、ついて行ってイイですか?</strong> <font color="#bbb">东京电视台 社会纪实</font><br>节目专门访问赶不上末班电车的陌生人，以支付计程车费来换取跟随到他们家访问的机会，进而领略纪录人生百态。</p></li></ul><h3 id="欧美纪录片"><a href="#欧美纪录片" class="headerlink" title="欧美纪录片"></a>欧美纪录片</h3><ul><li><p><strong>透视美国 America Revealed</strong> <font color="#bbb">PBS 社会纪实</font><br>用俯视的视角，从食品、交通、能源、制造四个方面全景展示了美国各个产业概况和不为人知的细节。最开始看的时候对美国的产业状况叹为观止，后来看了央视《超级工程》第三季发现我们用同样的视角也可以展现一个有活力、有创造力的中国。</p></li><li><p><strong>企鹅群里有特务 Penguins: Spy in the Huddle</strong> <font color="#bbb">BBC 自然地理</font><br>自然地理纪录片里难得一部很喜欢的片子，光看着各种企鹅卖萌的样子就很疗愈了，颜值果然很重要。</p></li><li><p><strong>空中浩劫 Mayday</strong> <font color="#bbb">Cineflix 科技与社会</font><br>各种惊心动魄，各种细致入微，细致的调查背后是对生命的尊重。</p></li><li><p><strong>我们的孩子足够坚强吗？中式学校 Are Our Kids Tough Enough? Chinese School</strong> <font color="#bbb">BBC 教育</font><br>让5名中国老师在英国南部汉普郡的一所中学实施 4 周中国式教学试验的故事。说实话，这样短期的社会实验没什么大的研究意义吧，一些评论把所谓的对比看得太严重了反而感觉不会，纯当作真人秀综艺节目看倒是很有趣的。</p></li></ul></div><div class="tab-pane" id="share-3"><p>这里展示的是一些我正在使用的应用或者服务，有的是第三方提供的，也有的是我自己搭建部署在服务器上的；其中有的是免费开源项目，有的也会对使用者进行收费。</p><div class="note warning"><p><strong>注意</strong>：使用这些项目前请仔细查阅其使用文档和授权协议，本站不保证项目的通用性，亦不对使用这些项目产生的任何后果负责。</p></div><h2 id="本站使用的技术与服务"><a href="#本站使用的技术与服务" class="headerlink" title="本站使用的技术与服务"></a>本站使用的技术与服务</h2><ul><li>框架主题：<a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> 静态博客框架 + <a href="https://github.com/theme-next/hexo-theme-next" target="_blank" rel="noopener">NexT Gemini</a> 主题</li><li>访客分析：<a href="https://analytics.google.com" target="_blank" rel="noopener">Google Analytics</a></li><li>浏览统计：<a href="https://github.com/LEAFERx/hexo-leancloud-counter" target="_blank" rel="noopener">hexo-leancloud-counter</a></li><li>评论留言：<a href="https://valine.js.org" target="_blank" rel="noopener">Valine</a></li><li>静态存储：<a href="https://cloud.tencent.com/product/cos" target="_blank" rel="noopener">腾讯云对象存储（COS）</a></li><li>构建部署：<a href="https://github.com/features/actions" target="_blank" rel="noopener">GitHub Actions</a></li></ul><h2 id="部署的服务"><a href="#部署的服务" class="headerlink" title="部署的服务"></a>部署的服务</h2><p>这些是我自己搭建并正在运行的服务，由于服务器运行能力有限，暂时不会对外开放提供服务。我会把这些项目的搭建过程发布在日志中，如果您对其中的某个项目感兴趣，您也可以自行尝试搭建。</p><p>我部署的 <a href="https://status.zdl.one" target="_blank" rel="noopener">服务运行状态</a> 由 Uptime Robot 提供间隔为五分钟的监测服务。如果您发现某个项目运行状态异常，也欢迎及时通知我。</p><table><thead><tr><th>项目</th><th>功能</th><th>相关链接</th></tr></thead><tbody><tr><td>Hexo</td><td>静态博客生成工具</td><td><a href="https://blog.dlzhang.com/tag/Hexo/" target="_blank" rel="noopener">搭建记录</a> · <a href="https://dlzhang.com/" target="_blank" rel="noopener">个人主页</a> · <a href="https://mirror.zdl.one">博客镜像站</a></td></tr><tr><td>Valine Admin</td><td>Valine 评论后台管理</td><td><a href="https://github.com/DesertsP/Valine-Admin" target="_blank" rel="noopener">GitHub</a></td></tr><tr><td>自动签到</td><td>自动签到服务</td><td><a href="https://blog.dlzhang.com/posts/49/" target="_blank" rel="noopener">搭建记录 </a>· <a href="https://qiandao.today" target="_blank" rel="noopener">Demo</a> · <a href="https://github.com/binux/qiandao" target="_blank" rel="noopener">GitHub</a></td></tr><tr><td>FreshRSS</td><td>RSS 订阅器</td><td><a href="https://blog.dlzhang.com/posts/48/" target="_blank" rel="noopener">搭建记录</a> · <a href="https://github.com/FreshRSS/FreshRSS" target="_blank" rel="noopener">GitHub</a></td></tr><tr><td>RSSHub</td><td>RSS 订阅源生成器</td><td><a href="https://blog.dlzhang.com/posts/49/" target="_blank" rel="noopener">搭建记录</a> · <a href="https://docs.rsshub.app/" target="_blank" rel="noopener">Demo</a> · <a href="https://github.com/DIYgod/RSSHub" target="_blank" rel="noopener">GitHub</a></td></tr><tr><td>Live2D Widget</td><td>看板娘组件</td><td><a href="https://blog.dlzhang.com/posts/47/" target="_blank" rel="noopener">搭建记录</a> · <a href="https://github.com/stevenjoezhang/live2d-widget" target="_blank" rel="noopener">前端代码</a> · <a href="https://github.com/fghrsh/live2d_api" target="_blank" rel="noopener">后端 API</a></td></tr><tr><td>CORS Anywhere</td><td>跨域访问</td><td><a href="https://blog.dlzhang.com/posts/50/" target="_blank" rel="noopener">搭建记录</a> · <a href="https://cors-anywhere.herokuapp.com" target="_blank" rel="noopener">Demo</a> · <a href="https://github.com/Rob--W/cors-anywhere" target="_blank" rel="noopener">GitHub</a></td></tr><tr><td>Wechat for Handsome</td><td>公众号发表 Typecho Handsome 时光机动态</td><td><a href="https://blog.dlzhang.com/posts/50/" target="_blank" rel="noopener">搭建记录</a> · <a href="https://github.com/iLay1678/wechat_for_handsome" target="_blank" rel="noopener">GitHub</a></td></tr></tbody></table></div></div></div></div></div></div><div class="comments" id="valine-comments"></div><script>window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }</script></div><div class="toggle sidebar-toggle"><span class="toggle-line toggle-line-first"></span> <span class="toggle-line toggle-line-middle"></span> <span class="toggle-line toggle-line-last"></span></div><aside class="sidebar"><div class="sidebar-inner"><ul class="sidebar-nav motion-element"><li class="sidebar-nav-toc">文章目录</li><li class="sidebar-nav-overview">站点概览</li></ul><div class="post-toc-wrap sidebar-panel"></div><div class="site-overview-wrap sidebar-panel"><div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person"><img class="site-author-image" itemprop="image" alt="天伟" src="/images/coder.jpeg"><p class="site-author-name" itemprop="name">天伟</p><div class="site-description" itemprop="description"><br>程序员工作记录</div></div><div class="links-of-author motion-element"><span class="links-of-author-item"><a href="https://www.cnblogs.com/becoding/" title="博客园 → https:&#x2F;&#x2F;www.cnblogs.com&#x2F;becoding&#x2F;" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i></a></span></div></div></div></aside><div id="sidebar-dimmer"></div></div></main><footer class="footer"><div class="footer-inner"><div class="copyright">&copy; 2015 – <span itemprop="copyrightYear">2020</span> <span class="with-love"><i class="fas fa-heart"></i> </span><span class="author" itemprop="copyrightHolder">天伟</span></div></div></footer></div><script src="//cdn.jsdelivr.net/npm/animejs@3.1.0/lib/anime.min.js"></script><script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-pjax@0/pjax.min.js"></script><script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script><script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script><script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script><script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script><script src="/js/utils.js"></script><script src="/js/schemes/pisces.js"></script><script src="/js/next-boot.js"></script><script>var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});</script><script src="/js/local-search.js"></script><div id="pjax"><script>NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'ydaoV9samWgzerLX7OHEbRgk-MdYXbMMI',
+      appKey     : '5jRfX3rExENmJqhdzkRqPndP',
+      placeholder: "来这里留下你的想法与观点～（回复提醒通过邮件发送）",
+      avatar     : 'wavatar',
+      meta       : guest,
+      pageSize   : '5' || 10,
+      visitor    : false,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});</script><script type="text/javascript">if(window.location.hash)var checkExist=setInterval(function(){$(window.location.hash).length&&($("html, body").animate({scrollTop:$(window.location.hash).offset().top-90},1e3),clearInterval(checkExist))},100)</script><div class="moon-menu"><div class="moon-menu-items"><div class="moon-menu-item" onclick="back2bottom()"><i class="fas fa-chevron-down"></i></div><div class="moon-menu-item" onclick="back2top()"><i class="fas fa-chevron-up"></i></div></div><div class="moon-menu-button"><svg class="moon-menu-bg"><circle class="moon-menu-cricle" cx="50%" cy="50%" r="44%"></circle><circle class="moon-menu-border" cx="50%" cy="50%" r="48%"></circle></svg><div class="moon-menu-content"><div class="moon-menu-icon"><i class="fas fa-ellipsis-v"></i></div><div class="moon-menu-text"></div></div></div></div><script src="/js/injector.js"></script></div></body></html>

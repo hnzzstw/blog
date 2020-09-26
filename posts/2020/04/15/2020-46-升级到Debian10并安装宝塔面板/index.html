@@ -1,0 +1,170 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=2"><meta name="theme-color" content="#6c599f"><meta name="generator" content="Hexo 4.2.1"><link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png"><link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#6c599f"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="stylesheet" href="/css/main.css"><link rel="stylesheet" href="//fonts.googleapis.com/css?family=EB Garamond:300,300italic,400,400italic,700,700italic|Long Cang:300,300italic,400,400italic,700,700italic|Noto Serif SC:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext"><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css"><script id="hexo-configurations">var NexT=window.NexT||{},CONFIG={hostname:"mirror.zdl.one",root:"/",scheme:"Gemini",version:"7.8.0",exturl:!1,sidebar:{position:"left",display:"post",padding:18,offset:12,onmobile:!1},copycode:{enable:!0,show_result:!0,style:"mac"},back2top:{enable:!1,sidebar:!1,scrollpercent:!0},bookmark:{enable:!1,color:"#222",save:"auto"},fancybox:!0,mediumzoom:!1,lazyload:!0,pangu:!0,comments:{style:"tabs",active:null,storage:!0,lazyload:!0,nav:null},algolia:{hits:{per_page:10},labels:{input_placeholder:"Search for Posts",hits_empty:"We didn't find any results for the search: ${query}",hits_stats:"${hits} results found in ${time} ms"}},localsearch:{enable:!0,trigger:"auto",top_n_per_article:1,unescape:!1,preload:!1},motion:{enable:!1,async:!1,transition:{post_block:"fadeIn",post_header:"slideDownIn",post_body:"slideDownIn",coll_header:"slideLeftIn",sidebar:"slideUpIn"}},path:"search.xml"}</script><meta name="description" content="近日入手了一个阿里云的轻量应用服务器，看着价格还比较实惠，就打算把自己的博客也搬过去。服务器买都买了，当然还要折腾一下其他有趣的应用和服务，比如 RSS 订阅、RSSHub、自动签到、Live2D API 等等（其实是为了部署服务才买了服务器，顺带迁移了博客站点）。所以就在这里记录一下搭建的过程，方便日后维护和重装部署。"><meta property="og:type" content="article"><meta property="og:title" content="升级到 Debian 10 并安装宝塔面板"><meta property="og:url" content="https://mirror.zdl.one/posts/2020/04/15/2020-46-%E5%8D%87%E7%BA%A7%E5%88%B0Debian10%E5%B9%B6%E5%AE%89%E8%A3%85%E5%AE%9D%E5%A1%94%E9%9D%A2%E6%9D%BF/index.html"><meta property="og:site_name" content="天伟技术博客"><meta property="og:description" content="近日入手了一个阿里云的轻量应用服务器，看着价格还比较实惠，就打算把自己的博客也搬过去。服务器买都买了，当然还要折腾一下其他有趣的应用和服务，比如 RSS 订阅、RSSHub、自动签到、Live2D API 等等（其实是为了部署服务才买了服务器，顺带迁移了博客站点）。所以就在这里记录一下搭建的过程，方便日后维护和重装部署。"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://web-1256060851.cos.ap-shanghai.myqcloud.com/posts/2020/04/LNMP.jpg!500x"><meta property="article:published_time" content="2020-04-15T10:30:37.000Z"><meta property="article:modified_time" content="2020-05-20T08:33:41.000Z"><meta property="article:author" content="天伟"><meta property="article:tag" content="服务器"><meta property="article:tag" content="Linux"><meta property="article:tag" content="宝塔面板"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://web-1256060851.cos.ap-shanghai.myqcloud.com/posts/2020/04/LNMP.jpg!500x"><link rel="canonical" href="https://mirror.zdl.one/posts/2020/04/15/2020-46-%E5%8D%87%E7%BA%A7%E5%88%B0Debian10%E5%B9%B6%E5%AE%89%E8%A3%85%E5%AE%9D%E5%A1%94%E9%9D%A2%E6%9D%BF/"><script id="page-configurations">CONFIG.page={sidebar:"",isHome:!1,isPost:!0,lang:"zh-CN"}</script><script type="text/javascript">// Live2d
+// 注意：live2d_path 参数应使用绝对路径
+//const live2d_path = "https://web-1256060851.cos.ap-shanghai.myqcloud.com/assets-hexo/live2d/";
+const live2d_path = "/live2d/";
+
+// 封装异步加载资源的方法
+function loadExternalResource(url, type) {
+	return new Promise((resolve, reject) => {
+		let tag;
+
+		if (type === "css") {
+			tag = document.createElement("link");
+			tag.rel = "stylesheet";
+			tag.href = url;
+		}
+		else if (type === "js") {
+			tag = document.createElement("script");
+			tag.src = url;
+		}
+		if (tag) {
+			tag.onload = () => resolve(url);
+			tag.onerror = () => reject(url);
+			document.head.appendChild(tag);
+		}
+	});
+}
+
+// 加载 waifu.css live2d.min.js waifu-tips.js
+// if (screen.width >= 768) {
+// 	Promise.all([
+// 		loadExternalResource(live2d_path + "waifu.css", "css"),
+// 		loadExternalResource(live2d_path + "live2d.min.js", "js"),
+// 		loadExternalResource(live2d_path + "waifu-tips.js", "js")
+// 	]).then(() => {
+// 		initWidget({
+// 			waifuPath: live2d_path + "waifu-tips.json",
+// 			apiPath: "https://api.zdl.one/live2d/", // https://live2d.fghrsh.net/api/
+// 			//cdnPath: "https://cdn.jsdelivr.net/gh/fghrsh/live2d_api/"
+// 		});
+// 	});
+// }
+// initWidget 第一个参数为 waifu-tips.json 的路径，第二个参数为 API 地址
+// API 后端可自行搭建，参考 https://github.com/fghrsh/live2d_api
+// 初始化看板娘会自动加载指定目录下的 waifu-tips.json
+
+console.log(`
+  く__,.ヘヽ.        /  ,ー､ 〉
+           ＼ ', !-─‐-i  /  /´
+           ／｀ｰ'       L/／｀ヽ､
+         /   ／,   /|   ,   ,       ',
+       ｲ   / /-‐/  ｉ  L_ ﾊ ヽ!   i
+        ﾚ ﾍ 7ｲ｀ﾄ   ﾚ'ｧ-ﾄ､!ハ|   |
+          !,/7 '0'     ´0iソ|    |
+          |.从"    _     ,,,, / |./    |
+          ﾚ'| i＞.､,,__  _,.イ /   .i   |
+            ﾚ'| | / k_７_/ﾚ'ヽ,  ﾊ.  |
+              | |/i 〈|/   i  ,.ﾍ |  i  |
+             .|/ /  ｉ：    ﾍ!    ＼  |
+              kヽ>､ﾊ    _,.ﾍ､    /､!
+              !'〈//｀Ｔ´', ＼ ｀'7'ｰr'
+              ﾚ'ヽL__|___i,___,ンﾚ|ノ
+                  ﾄ-,/  |___./
+                  'ｰ'    !_,.:
+`);
+// End Live2d Code
+
+window.addEventListener('load', () => {
+	console.log('\n%c天伟博客', 'text-shadow: 0 1px 0 #ccc, 0 2px 0 #c9c9c9, 0 3px 0 #bbb, 0 4px 0 #b9b9b9, 0 5px 0 #aaa, 0 6px 1px rgba(0, 0, 0, .1), 0 0 5px rgba(0, 0, 0, .1), 0 1px 3px rgba(0, 0, 0, .3), 0 3px 5px rgba(0, 0, 0, .2), 0 5px 10px rgba(0, 0, 0, .25), 0 10px 10px rgba(0, 0, 0, .2), 0 20px 20px rgba(0, 0, 0, .15);\
+font-size: 4em;');
+	console.log('\n%cBanban Ramble%cv3.0.0%c\n', 'padding: 8px; background: #3f5973; font-weight: bold; font-size: large; color: white;', 'padding: 8px; background: #649ab6; font-size: large; color: #eee;','');
+	console.log(`页面加载完毕消耗了${Math.round(performance.now() * 100) / 100}ms`);
+});</script><link rel="stylesheet" type="text/css" href="/css/injector.css"><title>升级到 Debian 10 并安装宝塔面板 | 天伟技术博客</title><noscript><style>.sidebar-inner,.use-motion .brand,.use-motion .collection-header,.use-motion .comments,.use-motion .menu-item,.use-motion .pagination,.use-motion .post-block,.use-motion .post-body,.use-motion .post-header{opacity:initial}.use-motion .site-subtitle,.use-motion .site-title{opacity:initial;top:initial}.use-motion .logo-line-before i{left:initial}.use-motion .logo-line-after i{right:initial}</style></noscript><link rel="alternate" href="/atom.xml" title="天伟技术博客" type="application/atom+xml">
+</head><body itemscope itemtype="http://schema.org/WebPage"><div class="container"><div class="headband"></div><header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="header-inner"><div class="site-brand-container"><div class="site-nav-toggle"><div class="toggle" aria-label="切换导航栏"><span class="toggle-line toggle-line-first"></span> <span class="toggle-line toggle-line-middle"></span> <span class="toggle-line toggle-line-last"></span></div></div><div class="site-meta"><a href="/" class="brand" rel="start"><span class="logo-line-before"><i></i></span><h1 class="site-title">天伟技术博客</h1><span class="logo-line-after"><i></i></span></a><p class="site-subtitle" itemprop="description">埋头拼命的同时 别忘了抬头看路</p></div><div class="site-nav-right"><div class="toggle popup-trigger"><i class="fa fa-search fa-fw fa-lg"></i></div></div></div><nav class="site-nav"><ul id="menu" class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fas fa-home fa-fw"></i>本站首页</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-overview"><a href="/overview/" rel="section"><i class="fas fa-th fa-fw"></i>文章总览</a></li><li class="menu-item menu-item-search"><a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索</a></li></ul></nav><div class="search-pop-overlay"><div class="popup search-popup"><div class="search-header"><span class="search-icon"><i class="fa fa-search"></i></span><div class="search-input-container"><input autocomplete="off" autocapitalize="off" placeholder="请输入搜索内容" spellcheck="false" type="search" class="search-input"></div><span class="popup-btn-close"><i class="fa fa-times-circle"></i></span></div><div id="search-result"><div id="no-result"><i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i></div></div></div></div></div></header><main class="main"><div class="main-inner"><div class="content-wrap"><div class="content post posts-expand"><article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN"><link itemprop="mainEntityOfPage" href="https://mirror.zdl.one/posts/2020/04/15/2020-46-%E5%8D%87%E7%BA%A7%E5%88%B0Debian10%E5%B9%B6%E5%AE%89%E8%A3%85%E5%AE%9D%E5%A1%94%E9%9D%A2%E6%9D%BF/"><span hidden itemprop="author" itemscope itemtype="http://schema.org/Person"><meta itemprop="image" content="/images/coder.jpeg"><meta itemprop="name" content="天伟"><meta itemprop="description" content="<br>程序员工作记录"></span><span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization"><meta itemprop="name" content="天伟技术博客"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">升级到 Debian 10 并安装宝塔面板</h1><div class="post-meta"><span class="post-meta-item"><span class="post-meta-item-icon"><i class="far fa-calendar"></i> </span><span class="post-meta-item-text">发表于</span> <time title="创建时间：2020-04-15 18:30:37" itemprop="dateCreated datePublished" datetime="2020-04-15T18:30:37+08:00">2020-04-15</time> </span><span class="post-meta-item"><span class="post-meta-item-icon"><i class="far fa-folder"></i> </span><span class="post-meta-item-text">分类于</span> <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/overview/technology/" itemprop="url" rel="index"><span itemprop="name">科技树</span></a> </span></span><span class="post-meta-item"><span class="post-meta-item-icon"><i class="far fa-comment"></i> </span><span class="post-meta-item-text">Valine：</span> <a title="valine" href="/posts/2020/04/15/2020-46-%E5%8D%87%E7%BA%A7%E5%88%B0Debian10%E5%B9%B6%E5%AE%89%E8%A3%85%E5%AE%9D%E5%A1%94%E9%9D%A2%E6%9D%BF/#valine-comments" itemprop="discussionUrl"><span class="post-comments-count valine-comment-count" data-xid="/posts/2020/04/15/2020-46-%E5%8D%87%E7%BA%A7%E5%88%B0Debian10%E5%B9%B6%E5%AE%89%E8%A3%85%E5%AE%9D%E5%A1%94%E9%9D%A2%E6%9D%BF/" itemprop="commentCount"></span></a></span></div></header><div class="post-body" itemprop="articleBody"><p>近日入手了一个阿里云的轻量应用服务器，看着价格还比较实惠，就打算把自己的博客也搬过去。服务器买都买了，当然还要折腾一下其他有趣的应用和服务，比如 RSS 订阅、RSSHub、自动签到、Live2D API 等等<del>（其实是为了部署服务才买了服务器，顺带迁移了博客站点）</del>。所以就在这里记录一下搭建的过程，方便日后维护和重装部署。<a id="more"></a></p><h2 id="1-系统升级到-Debian-10"><a href="#1-系统升级到-Debian-10" class="headerlink" title="1. 系统升级到 Debian 10"></a>1. 系统升级到 Debian 10</h2><p>作为代码小白，当然是无脑选择使用宝塔面板。阿里云的控制台可以直接安装宝塔面板，不过因为搭配的系统是 CentOS，感觉不是很习惯，就直接选择了先安装 Debian 9 系统，然后自行升级的方式。</p><p>作为更新强迫症患者中，当然是要先把系统更新到最新版本啦，这里主要参考了<a href="https://niconiconi.fun/2019/06/14/debian-9-upgrade-debian-10/" target="_blank" rel="noopener">葉子的操作</a>。升级到 Debian 10 （版本代号 buster）之前请确认你没有添加过奇怪的软件源，或者编译过一些未知的东西，如果有的话请了解一下之前的操作会不会对系统造成损伤，如果有的话不建议升级，容易出问题。因此，如果不是全新系统升级，建议先进行备份。</p><p>因为我的是全新系统，就没有备份环节啦。建议先将本地软件更新到最新版，然后再升级 Debian 不然很有可能会出现一些未知的问题，本次升级基于官方源进行。</p><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 更新软件索引</span></span><br><span class="line">sudo apt update</span><br><span class="line"><span class="comment"># 更新本地所有软件到最新版</span></span><br><span class="line">sudo apt full-upgrade</span><br><span class="line"><span class="comment"># 切换 stretch 源到 buster 源</span></span><br><span class="line">sudo sed -i <span class="string">'s/stretch/buster/g'</span> /etc/apt/sources.list</span><br><span class="line"><span class="comment"># 再次更新软件索引</span></span><br><span class="line">sudo apt update</span><br><span class="line"><span class="comment"># 升级 Debian 9 stretch 到 Debian 10 buster</span></span><br><span class="line">sudo apt upgrade</span><br><span class="line"><span class="comment"># 重启服务器</span></span><br><span class="line">sudo reboot</span><br></pre></td></tr></table></figure><p>由于是跨版本升级，在第五个命令的升级过程中很多地方需要我们手动设置或确认：</p><ul><li><p>首先需要确认的是 apt， 感兴趣的可以看一下具体参数设置，直接输入 <code>q</code> 进行安装；</p></li><li><p>之后可能会跳出 Configuring kexec-tools，Configuring kdump-tools 和 Configuring libc6:amd64 的确认窗口，这里选择 <code>&lt;Yes&gt;</code>；</p></li><li><p>接下来就和平时更新差不多了，遇到冲突选择 <code>Y or I</code> 使用更新配置，还是 选择 <code>N or O</code> 保留已有配置，或者其他选项。我个人因为是全新安装升级，所以都选择了 <code>Y</code> 使用更新配置。</p></li></ul><h2 id="2-安装宝塔面板"><a href="#2-安装宝塔面板" class="headerlink" title="2. 安装宝塔面板"></a>2. 安装宝塔面板</h2><p>参考宝塔官网给出的安装命令安装宝塔面板：</p><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -sSO http://download.bt.cn/install/install_panel.sh &amp;&amp; bash install_panel.sh</span><br></pre></td></tr></table></figure><p>安装完毕后就会显示面板的访问路径、默认的登录用户名密码等信息。这里需要注意的是，我们需要先去云服务器的控制台安全组（防火墙）处先把宝塔面板访问的默认端口 8888 放通，要不然是无法访问面板的。</p><p>在浏览器登录宝塔面板后，就会跳出推荐安装套件的窗口。选择 LNMP 套件极速安装，版本上因为我的机器内存只有 1G，所以就选择了 MySQL 5.5 的版本，其他都选择了最新版本。</p><p><img data-src="https://web-1256060851.cos.ap-shanghai.myqcloud.com/posts/2020/04/LNMP.jpg!500x" alt="推荐安装套件"></p><div class="note info"><p><strong>注意</strong>：如果发现下载时无法连接到宝塔的下载地址（特别是境外服务器），可能需要先在首页的「Linux 工具箱」中临时修改一下「DNS 设置」，例如使用 1.1.1.1 或者 8.8.8.8。</p></div><p>安装完推荐套件后，继续在「软件商店」中安装其他需要的软件，我们这里选择安装：</p><ul><li>[运行环境] Docker 管理器：方便后续安装 RSSHub 和自动签到服务；</li><li>[运行环境] PM2 管理器：Nodejs 服务可以通过其管理，如果安装 Nodejs 失败，可以使用 <code>nvm</code> 手动安装，方法参考 <a href="https://github.com/nvm-sh/nvm" target="_blank" rel="noopener">nvm-sh/nvm</a> 的说明，可能需要指定好路径才能正确使用（具体可以参考 <a href="https://www.cnblogs.com/weifeng1463/p/11321432.html" target="_blank" rel="noopener">解决 nvm command not found 问题的方法</a>）；</li><li>[系统工具] 日志清理工具：可以一键清理指定日志和系统垃圾；</li><li>[插件] 阿里云 OSS：将网站或数据库打包备份到阿里云 OSS 对象存储空间，在阿里云同一地域下的云产品之间还可以通过内网地址连接，既能提高连接速度，也能减少流量费用；</li><li>[第三方应用] Nginx 免费防火墙。</li></ul><p>不过，安装完毕设置阿里云 OSS 参数插件之前，执行以下命令，不然可能无法正常执行备份操作（提示：<code>ImportError: No module named oss2</code>）：</p><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install oss2</span><br></pre></td></tr></table></figure><p>对于 PHP，我们可以在「性能调整」中根据自己的内存大小修改并发方案，还可以选择安装以下扩展：</p><ul><li>fileinfo：FreshRSS 需要此扩展</li><li>opcache：开启脚本缓存可以提高 PHP 运行性能</li><li>redis：内容缓存</li></ul><div class="note info"><p><strong>注意</strong>：内存只有 1G 的服务器可能无法安装 fileinfo，这时候需要我们在「Linux 工具箱」的「Swap/虚拟内存」中添加 Swap，我们可以设置如 1024MB 或者 1500MB。</p></div><p>软件安装完毕后，可以进入「面板设置」，修改默认的访问端口、登录用户名密码等信息，还可以为面板绑定访问域名并添加 SSL 证书。</p><p>对于 FTP 工具，本地可以使用 FileZilla 软件，使用方法可以参考宝塔面板的<a href="https://www.bt.cn/bbs/thread-43162-1-1.html" target="_blank" rel="noopener">论坛帖子</a>。</p></div><div class="popular-posts-header">相关推荐</div><ul class="popular-posts"><li class="popular-posts-item"><div class="popular-posts-title"><a href="\posts\2020\04\15\2020-48-部署RSS订阅服务FreshRSS\" rel="bookmark">部署 RSS 订阅服务 FreshRSS</a></div></li><li class="popular-posts-item"><div class="popular-posts-title"><a href="\posts\2020\04\15\2020-47-服务器部署Hexo博客和看板娘Live2D-API\" rel="bookmark">服务器部署 Hexo 博客和看板娘 Live2D API</a></div></li><li class="popular-posts-item"><div class="popular-posts-title"><a href="\posts\2020\04\15\2020-49-宝塔面板部署RSSHub和自动签到Docker应用\" rel="bookmark">宝塔面板部署 RSSHub 和自动签到 Docker 应用</a></div></li><li class="popular-posts-item"><div class="popular-posts-title"><a href="\posts\2020\04\30\2020-50-博客迁移到Typecho记录\" rel="bookmark">博客迁移到 Typecho 记录</a></div></li></ul><div class="reward-container"><div>🍭 支持一根棒棒糖！</div><button onclick='var qr=document.getElementById("qr");qr.style.display="none"===qr.style.display?"block":"none"'><i class="fas fa-qrcode" style="font-size:1.7em;line-height:1.2em"></i></button><div id="qr" style="display:none"><div style="display:inline-block"><img src="/images/wxpay.png" alt="天伟 微信支付"><p>微信支付</p></div><div style="display:inline-block"><img src="/images/alipay.png" alt="天伟 支付宝"><p>支付宝</p></div></div></div><footer class="post-footer"><div class="post-tags"><a href="/overview/tags/%E6%9C%8D%E5%8A%A1%E5%99%A8/" rel="tag"><i class="fa fa-tag"></i> 服务器</a> <a href="/overview/tags/Linux/" rel="tag"><i class="fa fa-tag"></i> Linux</a> <a href="/overview/tags/%E5%AE%9D%E5%A1%94%E9%9D%A2%E6%9D%BF/" rel="tag"><i class="fa fa-tag"></i> 宝塔面板</a></div><div class="post-nav"><div class="post-nav-item"><a href="/posts/2020/03/29/2020-45-%E5%85%A8%E7%90%83%E6%96%B0%E5%86%A0%E8%82%BA%E7%82%8E%E7%9A%84%E6%89%A9%E6%95%A3%E4%B8%8E%E9%98%B2%E7%96%AB%E8%A7%82%E5%AF%9F/" rel="prev" title="全球新冠肺炎的扩散与防疫观察"><i class="fa fa-chevron-left"></i> 全球新冠肺炎的扩散与防疫观察</a></div><div class="post-nav-item"><a href="/posts/2020/04/15/2020-47-%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%83%A8%E7%BD%B2Hexo%E5%8D%9A%E5%AE%A2%E5%92%8C%E7%9C%8B%E6%9D%BF%E5%A8%98Live2D-API/" rel="next" title="服务器部署 Hexo 博客和看板娘 Live2D API">服务器部署 Hexo 博客和看板娘 Live2D API <i class="fa fa-chevron-right"></i></a></div></div></footer></article></div><div class="comments" id="valine-comments"></div><script>window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }</script></div><div class="toggle sidebar-toggle"><span class="toggle-line toggle-line-first"></span> <span class="toggle-line toggle-line-middle"></span> <span class="toggle-line toggle-line-last"></span></div><aside class="sidebar"><div class="sidebar-inner"><ul class="sidebar-nav motion-element"><li class="sidebar-nav-toc">文章目录</li><li class="sidebar-nav-overview">站点概览</li></ul><div class="post-toc-wrap sidebar-panel"><div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-系统升级到-Debian-10"><span class="nav-text">1. 系统升级到 Debian 10</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-安装宝塔面板"><span class="nav-text">2. 安装宝塔面板</span></a></li></ol></div></div><div class="site-overview-wrap sidebar-panel"><div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person"><img class="site-author-image" itemprop="image" alt="天伟" src="/images/coder.jpeg"><p class="site-author-name" itemprop="name">天伟</p><div class="site-description" itemprop="description"><br>程序员工作记录</div></div><div class="links-of-author motion-element"><span class="links-of-author-item"><a href="https://www.cnblogs.com/becoding/" title="博客园 → https:&#x2F;&#x2F;www.cnblogs.com&#x2F;becoding&#x2F;" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i></a></span></div></div></div></aside><div id="sidebar-dimmer"></div></div></main><footer class="footer"><div class="footer-inner"><div class="copyright">&copy; 2015 – <span itemprop="copyrightYear">2020</span> <span class="with-love"><i class="fas fa-heart"></i> </span><span class="author" itemprop="copyrightHolder">天伟</span></div></div></footer></div><script src="//cdn.jsdelivr.net/npm/animejs@3.1.0/lib/anime.min.js"></script><script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-pjax@0/pjax.min.js"></script><script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script><script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script><script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script><script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script><script src="/js/utils.js"></script><script src="/js/schemes/pisces.js"></script><script src="/js/next-boot.js"></script><script>var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});</script><script src="/js/local-search.js"></script><div id="pjax"><script>NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'ydaoV9samWgzerLX7OHEbRgk-MdYXbMMI',
+      appKey     : '5jRfX3rExENmJqhdzkRqPndP',
+      placeholder: "来这里留下你的想法与观点～（回复提醒通过邮件发送）",
+      avatar     : 'wavatar',
+      meta       : guest,
+      pageSize   : '5' || 10,
+      visitor    : false,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});</script><script type="text/javascript">if(window.location.hash)var checkExist=setInterval(function(){$(window.location.hash).length&&($("html, body").animate({scrollTop:$(window.location.hash).offset().top-90},1e3),clearInterval(checkExist))},100)</script><div class="moon-menu"><div class="moon-menu-items"><div class="moon-menu-item" onclick="back2bottom()"><i class="fas fa-chevron-down"></i></div><div class="moon-menu-item" onclick="back2top()"><i class="fas fa-chevron-up"></i></div></div><div class="moon-menu-button"><svg class="moon-menu-bg"><circle class="moon-menu-cricle" cx="50%" cy="50%" r="44%"></circle><circle class="moon-menu-border" cx="50%" cy="50%" r="48%"></circle></svg><div class="moon-menu-content"><div class="moon-menu-icon"><i class="fas fa-ellipsis-v"></i></div><div class="moon-menu-text"></div></div></div></div><script src="/js/injector.js"></script></div></body></html>

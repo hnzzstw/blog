@@ -1,0 +1,170 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=2"><meta name="theme-color" content="#6c599f"><meta name="generator" content="Hexo 4.2.1"><link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png"><link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#6c599f"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="stylesheet" href="/css/main.css"><link rel="stylesheet" href="//fonts.googleapis.com/css?family=EB Garamond:300,300italic,400,400italic,700,700italic|Long Cang:300,300italic,400,400italic,700,700italic|Noto Serif SC:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext"><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css"><script id="hexo-configurations">var NexT=window.NexT||{},CONFIG={hostname:"mirror.zdl.one",root:"/",scheme:"Gemini",version:"7.8.0",exturl:!1,sidebar:{position:"left",display:"post",padding:18,offset:12,onmobile:!1},copycode:{enable:!0,show_result:!0,style:"mac"},back2top:{enable:!1,sidebar:!1,scrollpercent:!0},bookmark:{enable:!1,color:"#222",save:"auto"},fancybox:!0,mediumzoom:!1,lazyload:!0,pangu:!0,comments:{style:"tabs",active:null,storage:!0,lazyload:!0,nav:null},algolia:{hits:{per_page:10},labels:{input_placeholder:"Search for Posts",hits_empty:"We didn't find any results for the search: ${query}",hits_stats:"${hits} results found in ${time} ms"}},localsearch:{enable:!0,trigger:"auto",top_n_per_article:1,unescape:!1,preload:!1},motion:{enable:!1,async:!1,transition:{post_block:"fadeIn",post_header:"slideDownIn",post_body:"slideDownIn",coll_header:"slideLeftIn",sidebar:"slideUpIn"}},path:"search.xml"}</script><meta name="description" content="RSS 订阅我之前是使用 Inoreader，但是免费版的即使是在 Reeder 客户端下浏览依然是有广告植入的，而且听闻最近在境内已经无法访问了，所以就考虑自建一个。一开始考虑的是 Tiny Tiny RSS，这个之前在腾讯云的学生机上就尝试搭建过。但是订阅源的自动刷新一直搞不定，看了很多教程也没有成功，而且界面设置什么的都不是很喜欢，就放弃了。继续寻找之下找到了 FreshRSS，自带支持 R"><meta property="og:type" content="article"><meta property="og:title" content="部署 RSS 订阅服务 FreshRSS"><meta property="og:url" content="https://mirror.zdl.one/posts/2020/04/15/2020-48-%E9%83%A8%E7%BD%B2RSS%E8%AE%A2%E9%98%85%E6%9C%8D%E5%8A%A1FreshRSS/index.html"><meta property="og:site_name" content="天伟技术博客"><meta property="og:description" content="RSS 订阅我之前是使用 Inoreader，但是免费版的即使是在 Reeder 客户端下浏览依然是有广告植入的，而且听闻最近在境内已经无法访问了，所以就考虑自建一个。一开始考虑的是 Tiny Tiny RSS，这个之前在腾讯云的学生机上就尝试搭建过。但是订阅源的自动刷新一直搞不定，看了很多教程也没有成功，而且界面设置什么的都不是很喜欢，就放弃了。继续寻找之下找到了 FreshRSS，自带支持 R"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://web-1256060851.cos.ap-shanghai.myqcloud.com/posts/2020/04/create_site.jpg!500x"><meta property="og:image" content="https://web-1256060851.cos.ap-shanghai.myqcloud.com/posts/2020/04/site_path.jpg!500x"><meta property="og:image" content="https://web-1256060851.cos.ap-shanghai.myqcloud.com/posts/2020/04/db_settings.jpg!400x"><meta property="article:published_time" content="2020-04-15T12:30:45.000Z"><meta property="article:modified_time" content="2020-05-20T08:33:41.000Z"><meta property="article:author" content="天伟"><meta property="article:tag" content="服务器"><meta property="article:tag" content="Linux"><meta property="article:tag" content="RSS"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://web-1256060851.cos.ap-shanghai.myqcloud.com/posts/2020/04/create_site.jpg!500x"><link rel="canonical" href="https://mirror.zdl.one/posts/2020/04/15/2020-48-%E9%83%A8%E7%BD%B2RSS%E8%AE%A2%E9%98%85%E6%9C%8D%E5%8A%A1FreshRSS/"><script id="page-configurations">CONFIG.page={sidebar:"",isHome:!1,isPost:!0,lang:"zh-CN"}</script><script type="text/javascript">// Live2d
+// 注意：live2d_path 参数应使用绝对路径
+//const live2d_path = "https://web-1256060851.cos.ap-shanghai.myqcloud.com/assets-hexo/live2d/";
+const live2d_path = "/live2d/";
+
+// 封装异步加载资源的方法
+function loadExternalResource(url, type) {
+	return new Promise((resolve, reject) => {
+		let tag;
+
+		if (type === "css") {
+			tag = document.createElement("link");
+			tag.rel = "stylesheet";
+			tag.href = url;
+		}
+		else if (type === "js") {
+			tag = document.createElement("script");
+			tag.src = url;
+		}
+		if (tag) {
+			tag.onload = () => resolve(url);
+			tag.onerror = () => reject(url);
+			document.head.appendChild(tag);
+		}
+	});
+}
+
+// 加载 waifu.css live2d.min.js waifu-tips.js
+// if (screen.width >= 768) {
+// 	Promise.all([
+// 		loadExternalResource(live2d_path + "waifu.css", "css"),
+// 		loadExternalResource(live2d_path + "live2d.min.js", "js"),
+// 		loadExternalResource(live2d_path + "waifu-tips.js", "js")
+// 	]).then(() => {
+// 		initWidget({
+// 			waifuPath: live2d_path + "waifu-tips.json",
+// 			apiPath: "https://api.zdl.one/live2d/", // https://live2d.fghrsh.net/api/
+// 			//cdnPath: "https://cdn.jsdelivr.net/gh/fghrsh/live2d_api/"
+// 		});
+// 	});
+// }
+// initWidget 第一个参数为 waifu-tips.json 的路径，第二个参数为 API 地址
+// API 后端可自行搭建，参考 https://github.com/fghrsh/live2d_api
+// 初始化看板娘会自动加载指定目录下的 waifu-tips.json
+
+console.log(`
+  く__,.ヘヽ.        /  ,ー､ 〉
+           ＼ ', !-─‐-i  /  /´
+           ／｀ｰ'       L/／｀ヽ､
+         /   ／,   /|   ,   ,       ',
+       ｲ   / /-‐/  ｉ  L_ ﾊ ヽ!   i
+        ﾚ ﾍ 7ｲ｀ﾄ   ﾚ'ｧ-ﾄ､!ハ|   |
+          !,/7 '0'     ´0iソ|    |
+          |.从"    _     ,,,, / |./    |
+          ﾚ'| i＞.､,,__  _,.イ /   .i   |
+            ﾚ'| | / k_７_/ﾚ'ヽ,  ﾊ.  |
+              | |/i 〈|/   i  ,.ﾍ |  i  |
+             .|/ /  ｉ：    ﾍ!    ＼  |
+              kヽ>､ﾊ    _,.ﾍ､    /､!
+              !'〈//｀Ｔ´', ＼ ｀'7'ｰr'
+              ﾚ'ヽL__|___i,___,ンﾚ|ノ
+                  ﾄ-,/  |___./
+                  'ｰ'    !_,.:
+`);
+// End Live2d Code
+
+window.addEventListener('load', () => {
+	console.log('\n%c天伟博客', 'text-shadow: 0 1px 0 #ccc, 0 2px 0 #c9c9c9, 0 3px 0 #bbb, 0 4px 0 #b9b9b9, 0 5px 0 #aaa, 0 6px 1px rgba(0, 0, 0, .1), 0 0 5px rgba(0, 0, 0, .1), 0 1px 3px rgba(0, 0, 0, .3), 0 3px 5px rgba(0, 0, 0, .2), 0 5px 10px rgba(0, 0, 0, .25), 0 10px 10px rgba(0, 0, 0, .2), 0 20px 20px rgba(0, 0, 0, .15);\
+font-size: 4em;');
+	console.log('\n%cBanban Ramble%cv3.0.0%c\n', 'padding: 8px; background: #3f5973; font-weight: bold; font-size: large; color: white;', 'padding: 8px; background: #649ab6; font-size: large; color: #eee;','');
+	console.log(`页面加载完毕消耗了${Math.round(performance.now() * 100) / 100}ms`);
+});</script><link rel="stylesheet" type="text/css" href="/css/injector.css"><title>部署 RSS 订阅服务 FreshRSS | 天伟技术博客</title><noscript><style>.sidebar-inner,.use-motion .brand,.use-motion .collection-header,.use-motion .comments,.use-motion .menu-item,.use-motion .pagination,.use-motion .post-block,.use-motion .post-body,.use-motion .post-header{opacity:initial}.use-motion .site-subtitle,.use-motion .site-title{opacity:initial;top:initial}.use-motion .logo-line-before i{left:initial}.use-motion .logo-line-after i{right:initial}</style></noscript><link rel="alternate" href="/atom.xml" title="天伟技术博客" type="application/atom+xml">
+</head><body itemscope itemtype="http://schema.org/WebPage"><div class="container"><div class="headband"></div><header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="header-inner"><div class="site-brand-container"><div class="site-nav-toggle"><div class="toggle" aria-label="切换导航栏"><span class="toggle-line toggle-line-first"></span> <span class="toggle-line toggle-line-middle"></span> <span class="toggle-line toggle-line-last"></span></div></div><div class="site-meta"><a href="/" class="brand" rel="start"><span class="logo-line-before"><i></i></span><h1 class="site-title">天伟技术博客</h1><span class="logo-line-after"><i></i></span></a><p class="site-subtitle" itemprop="description">埋头拼命的同时 别忘了抬头看路</p></div><div class="site-nav-right"><div class="toggle popup-trigger"><i class="fa fa-search fa-fw fa-lg"></i></div></div></div><nav class="site-nav"><ul id="menu" class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fas fa-home fa-fw"></i>本站首页</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-overview"><a href="/overview/" rel="section"><i class="fas fa-th fa-fw"></i>文章总览</a></li><li class="menu-item menu-item-search"><a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索</a></li></ul></nav><div class="search-pop-overlay"><div class="popup search-popup"><div class="search-header"><span class="search-icon"><i class="fa fa-search"></i></span><div class="search-input-container"><input autocomplete="off" autocapitalize="off" placeholder="请输入搜索内容" spellcheck="false" type="search" class="search-input"></div><span class="popup-btn-close"><i class="fa fa-times-circle"></i></span></div><div id="search-result"><div id="no-result"><i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i></div></div></div></div></div></header><main class="main"><div class="main-inner"><div class="content-wrap"><div class="content post posts-expand"><article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN"><link itemprop="mainEntityOfPage" href="https://mirror.zdl.one/posts/2020/04/15/2020-48-%E9%83%A8%E7%BD%B2RSS%E8%AE%A2%E9%98%85%E6%9C%8D%E5%8A%A1FreshRSS/"><span hidden itemprop="author" itemscope itemtype="http://schema.org/Person"><meta itemprop="image" content="/images/coder.jpeg"><meta itemprop="name" content="天伟"><meta itemprop="description" content="<br>程序员工作记录"></span><span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization"><meta itemprop="name" content="天伟技术博客"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">部署 RSS 订阅服务 FreshRSS</h1><div class="post-meta"><span class="post-meta-item"><span class="post-meta-item-icon"><i class="far fa-calendar"></i> </span><span class="post-meta-item-text">发表于</span> <time title="创建时间：2020-04-15 20:30:45" itemprop="dateCreated datePublished" datetime="2020-04-15T20:30:45+08:00">2020-04-15</time> </span><span class="post-meta-item"><span class="post-meta-item-icon"><i class="far fa-folder"></i> </span><span class="post-meta-item-text">分类于</span> <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/overview/technology/" itemprop="url" rel="index"><span itemprop="name">科技树</span></a> </span></span><span class="post-meta-item"><span class="post-meta-item-icon"><i class="far fa-comment"></i> </span><span class="post-meta-item-text">Valine：</span> <a title="valine" href="/posts/2020/04/15/2020-48-%E9%83%A8%E7%BD%B2RSS%E8%AE%A2%E9%98%85%E6%9C%8D%E5%8A%A1FreshRSS/#valine-comments" itemprop="discussionUrl"><span class="post-comments-count valine-comment-count" data-xid="/posts/2020/04/15/2020-48-%E9%83%A8%E7%BD%B2RSS%E8%AE%A2%E9%98%85%E6%9C%8D%E5%8A%A1FreshRSS/" itemprop="commentCount"></span></a></span></div></header><div class="post-body" itemprop="articleBody"><p>RSS 订阅我之前是使用 Inoreader，但是免费版的即使是在 Reeder 客户端下浏览依然是有广告植入的，而且听闻最近在境内已经无法访问了，所以就考虑自建一个。一开始考虑的是 Tiny Tiny RSS，这个之前在腾讯云的学生机上就尝试搭建过。但是订阅源的自动刷新一直搞不定，看了很多教程也没有成功，而且界面设置什么的都不是很喜欢，就放弃了。继续寻找之下找到了 FreshRSS，自带支持 Reeder 客户端访问，不像 Tiny Tiny RSS 还需要安装 fever 插件。<a id="more"></a></p><h2 id="1-安装-FreshRSS"><a href="#1-安装-FreshRSS" class="headerlink" title="1. 安装 FreshRSS"></a>1. 安装 FreshRSS</h2><div class="note info"><p><strong>注意</strong>：需要确认已经安装了 PHP 扩展 fileinfo。如果使用宝塔面板，可以参考我上一篇文章的说明安装该扩展，此外还需要取消禁用两个函数：openlog 和 syslog（不然安装设置过程中会报错）。</p></div><p>接下来在宝塔面板创建新站点，设置好数据库与 PHP 版本（还可以添加上 SSL 证书）：</p><p><img data-src="https://web-1256060851.cos.ap-shanghai.myqcloud.com/posts/2020/04/create_site.jpg!500x" alt="创建新站点"></p><p>然后，删去网站根目录下默认添加创建的所有文件，确保文件夹全部清空。打开 SSH 终端，把 FreshRSS 源代码拉取到网站根目录：</p><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /www/wwwroot/</span><br><span class="line">git <span class="built_in">clone</span> https://github.com/FreshRSS/FreshRSS.git rss</span><br></pre></td></tr></table></figure><p>接下来，我们需要提升网站根目录下 <code>/data/</code> 文件夹的访问权限，不然安装设置过程中会报错：</p><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> rss</span><br><span class="line">chmod -R 777 ./data</span><br></pre></td></tr></table></figure><p>接下来我们需要设置一下网站的运行目录，因为根据 FreshRSS 官方文档的说明，推荐只将 <code>/p/</code> 目录公开到网络上：</p><p><img data-src="https://web-1256060851.cos.ap-shanghai.myqcloud.com/posts/2020/04/site_path.jpg!500x" alt="设置运行目录"></p><p>完成后，访问之前创建网站时设置的域名，就可以进入安装设置程序了。</p><p>先设置好语言，检查完毕没有缺少的组件和权限后，如下图所示设置数据库（用户名、数据库名根据之前创建的信息填写）：</p><p><img data-src="https://web-1256060851.cos.ap-shanghai.myqcloud.com/posts/2020/04/db_settings.jpg!400x" alt="数据库配置"></p><p>之后就是设置好自己的用户名密码，完成安装就可以进入 FreshRSS 界面进行登录操作了。</p><h2 id="2-客户端访问"><a href="#2-客户端访问" class="headerlink" title="2. 客户端访问"></a>2. 客户端访问</h2><p>要通过 Reeder 等客户端来阅读 RSS 资讯，还需要在设置界面等「认证」中打开「允许 API 访问 」，然后前往「用户帐户」设置好「API 密码」。这样，在 Reeder 客户端添加账号时选择 FreshRSS，然后填写如下：</p><ul><li>Sever：设置「API 密码」时右侧显示的链接地址；</li><li>User：FreshRSS 登录用户名；</li><li>Password：刚才设置的「API 密码」。</li></ul><h2 id="3-自动刷新订阅源"><a href="#3-自动刷新订阅源" class="headerlink" title="3. 自动刷新订阅源"></a>3. 自动刷新订阅源</h2><p>根据官方文档推荐的<a href="https://freshrss.github.io/FreshRSS/en/users/03_Main_view.html#refreshing-feeds" target="_blank" rel="noopener">订阅源刷新方案</a>，可以设置 crontab 定时任务如下：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">*&#x2F;5 * * * * php &#x2F;www&#x2F;wwwroot&#x2F;rss&#x2F;app&#x2F;actualize_script.php &gt; &#x2F;tmp&#x2F;FreshRSS.log 2&gt;&amp;1</span><br></pre></td></tr></table></figure><p>其中，<code>/www/wwwroot/rss/</code> 是 FreshRSS 网站的根目录路径，上述任务表示每五分钟刷新一次订阅源。在宝塔面板中设置就很简单，在「计划任务」中添加一个 Shell 脚本定时任务就可以了，脚本内容是：</p><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">php /www/wwwroot/rss/app/actualize_script.php &gt; /tmp/FreshRSS.log 2&gt;&amp;1</span><br></pre></td></tr></table></figure></div><div class="popular-posts-header">相关推荐</div><ul class="popular-posts"><li class="popular-posts-item"><div class="popular-posts-title"><a href="\posts\2020\04\15\2020-46-升级到Debian10并安装宝塔面板\" rel="bookmark">升级到 Debian 10 并安装宝塔面板</a></div></li><li class="popular-posts-item"><div class="popular-posts-title"><a href="\posts\2020\04\15\2020-49-宝塔面板部署RSSHub和自动签到Docker应用\" rel="bookmark">宝塔面板部署 RSSHub 和自动签到 Docker 应用</a></div></li><li class="popular-posts-item"><div class="popular-posts-title"><a href="\posts\2020\04\15\2020-47-服务器部署Hexo博客和看板娘Live2D-API\" rel="bookmark">服务器部署 Hexo 博客和看板娘 Live2D API</a></div></li><li class="popular-posts-item"><div class="popular-posts-title"><a href="\posts\2020\04\30\2020-50-博客迁移到Typecho记录\" rel="bookmark">博客迁移到 Typecho 记录</a></div></li></ul><div class="reward-container"><div>🍭 支持一根棒棒糖！</div><button onclick='var qr=document.getElementById("qr");qr.style.display="none"===qr.style.display?"block":"none"'><i class="fas fa-qrcode" style="font-size:1.7em;line-height:1.2em"></i></button><div id="qr" style="display:none"><div style="display:inline-block"><img src="/images/wxpay.png" alt="天伟 微信支付"><p>微信支付</p></div><div style="display:inline-block"><img src="/images/alipay.png" alt="天伟 支付宝"><p>支付宝</p></div></div></div><footer class="post-footer"><div class="post-tags"><a href="/overview/tags/%E6%9C%8D%E5%8A%A1%E5%99%A8/" rel="tag"><i class="fa fa-tag"></i> 服务器</a> <a href="/overview/tags/Linux/" rel="tag"><i class="fa fa-tag"></i> Linux</a> <a href="/overview/tags/RSS/" rel="tag"><i class="fa fa-tag"></i> RSS</a></div><div class="post-nav"><div class="post-nav-item"><a href="/posts/2020/04/15/2020-47-%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%83%A8%E7%BD%B2Hexo%E5%8D%9A%E5%AE%A2%E5%92%8C%E7%9C%8B%E6%9D%BF%E5%A8%98Live2D-API/" rel="prev" title="服务器部署 Hexo 博客和看板娘 Live2D API"><i class="fa fa-chevron-left"></i> 服务器部署 Hexo 博客和看板娘 Live2D API</a></div><div class="post-nav-item"><a href="/posts/2020/04/15/2020-49-%E5%AE%9D%E5%A1%94%E9%9D%A2%E6%9D%BF%E9%83%A8%E7%BD%B2RSSHub%E5%92%8C%E8%87%AA%E5%8A%A8%E7%AD%BE%E5%88%B0Docker%E5%BA%94%E7%94%A8/" rel="next" title="宝塔面板部署 RSSHub 和自动签到 Docker 应用">宝塔面板部署 RSSHub 和自动签到 Docker 应用 <i class="fa fa-chevron-right"></i></a></div></div></footer></article></div><div class="comments" id="valine-comments"></div><script>window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }</script></div><div class="toggle sidebar-toggle"><span class="toggle-line toggle-line-first"></span> <span class="toggle-line toggle-line-middle"></span> <span class="toggle-line toggle-line-last"></span></div><aside class="sidebar"><div class="sidebar-inner"><ul class="sidebar-nav motion-element"><li class="sidebar-nav-toc">文章目录</li><li class="sidebar-nav-overview">站点概览</li></ul><div class="post-toc-wrap sidebar-panel"><div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-安装-FreshRSS"><span class="nav-text">1. 安装 FreshRSS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-客户端访问"><span class="nav-text">2. 客户端访问</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-自动刷新订阅源"><span class="nav-text">3. 自动刷新订阅源</span></a></li></ol></div></div><div class="site-overview-wrap sidebar-panel"><div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person"><img class="site-author-image" itemprop="image" alt="天伟" src="/images/coder.jpeg"><p class="site-author-name" itemprop="name">天伟</p><div class="site-description" itemprop="description"><br>程序员工作记录</div></div><div class="links-of-author motion-element"><span class="links-of-author-item"><a href="https://www.cnblogs.com/becoding/" title="博客园 → https:&#x2F;&#x2F;www.cnblogs.com&#x2F;becoding&#x2F;" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i></a></span></div></div></div></aside><div id="sidebar-dimmer"></div></div></main><footer class="footer"><div class="footer-inner"><div class="copyright">&copy; 2015 – <span itemprop="copyrightYear">2020</span> <span class="with-love"><i class="fas fa-heart"></i> </span><span class="author" itemprop="copyrightHolder">天伟</span></div></div></footer></div><script src="//cdn.jsdelivr.net/npm/animejs@3.1.0/lib/anime.min.js"></script><script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-pjax@0/pjax.min.js"></script><script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script><script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script><script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script><script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script><script src="/js/utils.js"></script><script src="/js/schemes/pisces.js"></script><script src="/js/next-boot.js"></script><script>var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});</script><script src="/js/local-search.js"></script><div id="pjax"><script>NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'ydaoV9samWgzerLX7OHEbRgk-MdYXbMMI',
+      appKey     : '5jRfX3rExENmJqhdzkRqPndP',
+      placeholder: "来这里留下你的想法与观点～（回复提醒通过邮件发送）",
+      avatar     : 'wavatar',
+      meta       : guest,
+      pageSize   : '5' || 10,
+      visitor    : false,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});</script><script type="text/javascript">if(window.location.hash)var checkExist=setInterval(function(){$(window.location.hash).length&&($("html, body").animate({scrollTop:$(window.location.hash).offset().top-90},1e3),clearInterval(checkExist))},100)</script><div class="moon-menu"><div class="moon-menu-items"><div class="moon-menu-item" onclick="back2bottom()"><i class="fas fa-chevron-down"></i></div><div class="moon-menu-item" onclick="back2top()"><i class="fas fa-chevron-up"></i></div></div><div class="moon-menu-button"><svg class="moon-menu-bg"><circle class="moon-menu-cricle" cx="50%" cy="50%" r="44%"></circle><circle class="moon-menu-border" cx="50%" cy="50%" r="48%"></circle></svg><div class="moon-menu-content"><div class="moon-menu-icon"><i class="fas fa-ellipsis-v"></i></div><div class="moon-menu-text"></div></div></div></div><script src="/js/injector.js"></script></div></body></html>
